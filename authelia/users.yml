@@ -1,0 +1,8 @@
+users:
+  john:
+    displayname: "John Doe"
+    password: $argon2id$v=19$m=65536,t=3,p=4$gC+FsKrUA/y1nNWPRhD1uQ$36NiZpR92/hoyJczGFo47rFFGq0xCexzKLqfyCwqbt0
+    email: atchamanjunadh.ias@gmail.com
+    groups:
+      - admins
+      - dev

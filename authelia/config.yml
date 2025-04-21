@@ -1,0 +1,101 @@
+jwt_secret: manju2000
+default_redirection_url: https://auth.example.com
+
+server:
+  host: 0.0.0.0
+  port: 9091
+  
+log:
+  level: debug
+
+authentication_backend:
+  file:
+    path: /etc/authelia/users_database.yml
+
+access_control:
+  default_policy: one_factor
+  rules:
+    # Allow Gitea with only one_factor:
+    - domain: gitea.example.com
+      policy: one_factor
+
+    # Allow Grafana with only one_factor:
+    - domain: grafana.example.com
+      policy: one_factor
+
+session:
+  name: authelia_session
+  secret: Manju2001  # Generate with: openssl rand -base64 32
+  domain: example.com
+  same_site: lax
+  expiration: 1h
+  inactivity: 5m
+
+identity_providers:
+  oidc:
+    issuer_private_key: |
+      -----BEGIN PRIVATE KEY-----
+      MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCjmgvvmXE++x02
+      UdOzMBIuAA0Ifc+wX5EJ6PYZXKQRK4RqNZAM1T5kIJSczmhao/DPs0ymY558sIuU
+      bLBoqxq3NTGxh8T9oViL3TP/096LdblcgE4jHpfH+hrzeN5taxq80jIPMmJoyQDk
+      OsCGjQydaHtZ+spzTSQm3z4iqr3yYTO9J9k3WMJ90x0NlzzKIOQnBF9voEk7BZ2J
+      6tNZk5FcTs4GWcqFkwPewa+WmWPjOiaRNckubMNDd3vyGjzceWHLPUSFwfr+nfIQ
+      70iM4byFOSSyamBN7c7T0dpVtnQhM/S/EtZV2y6DAaqVf+6Fw6ugpq4vItB/PwLQ
+      kFXVDC0JAgMBAAECgf8tD5sojvUNz3PcVqeSx5CXZpTqljDm98imutgN7+HvQXjX
+      SB3cU7zedFUGLQ4W6RaWe72eCxI8EXADbrIzxQROA2GA8AosOl6sEA/RBu/8RSfj
+      GzmwJv/nTASxytu+nsReiUx00aMgnFOxFLfJy/KwdAJXIG3uQqtA/gfK2+UePPbf
+      PANoGSYtbRUo5BqzahT/N36fhJ8ntlDwzuJBJPliY+tIQoTd9dYWvbKMJazXpYWx
+      EnUbTK1Tyl7B7zZA6GTVN/7xDxcu1I0eT0/nL6QGBpe9LliGKayraAaEcF5exkYN
+      Xk3z3c5RgPXSEkqL6y8CH/0r09rnV37qR+I9RxECgYEAzuUBoQGVkkX1l5RlG3w9
+      VfZ9uXD2Zflgu+L3l0QVc+u9PTgkP3P5KzNNbeNv4y2ipTO2CZWWz7k6mk7AyDDX
+      5VAC1Fp3OeuTZGvKCb7CEV47cJb7ha6mcqZ/ddYPrIKJMk2qRN1D/y1YveHUPsE0
+      5CWvIDUaXp84j4jR4IR3uvkCgYEAym6NXbIT2YbDsvUFcGP54UXtHsySozcwuSkT
+      zhJWTAnLVoBorkukaaI4gis06BijGFWbQwMMH438drC5klpqM/GuVQRvZbgxGoSa
+      YPocNYKODWqZ/WZaphl49hVBSfE9MeN2tAjIP/NK63EXKvybT5BKXhMfk7uU8iln
+      +JAQ9pECgYEAi2Pq1wj0Npp/vmIyRHRN9q6dQeUDfOyo6a0e1oD+Wx1GYAqFEWMX
+      Sq3DyvdimJJUdC0ExixMcSMAgpnwdG/D5TEk1uEkVpeKtCuS8UHeCkmMjmyKhSSH
+      69KVKVTRNo6z1HpS7xaMC04H7dZKYwVUlyl0daSRYZKwTrQFgth8ujECgYEAyhkn
+      D3Ta9l/h/0c5v+RAM5SRUB9jAon2HdWRzTlnaJCareiTGfew1Dk9e09RiaoXIhNN
+      Z9CiCNrDQ2faTO/xeZx+tKgx4vbKJzRdwBXTleSal3Bm/qJyO8PQjLXZsc2jj6wM
+      9V6TNa1ajcYhICyDjiJ67ILhEqfC4yVNhM2n8dECgYA3cU9XXemh65t76xVshSVm
+      fe+DFM5zmlVsrD+hZcNSWKYihqVntsL6WHMJ3lv5ZY30CKkMHYJ/S8Oq7fGHBTOR
+      MEoMwlwdHUZ0o0HsEJ0K8cMGtqYjtiVG6gCl9gCPbzRKwEOQKjTYVLI4cxsvFywS
+      mUCy20Uk2j42jX+YFyxWEg==
+      -----END PRIVATE KEY-----
+    clients:
+      - id: gitea
+        description: Gitea
+        secret: gitea221  # Generate with: openssl rand -base64 32
+        redirect_uris:
+          - https://gitea.example.com/user/oauth2/authelia/callback
+        scopes:
+          - openid
+          - profile
+          - email
+        authorization_policy: one_factor
+
+
+      - id: grafana
+        description: Grafana
+        secret: grafana221  # Generate with: openssl rand -base64 32
+        redirect_uris:
+          - https://grafana.example.com/login/generic_oauth
+        scopes:
+          - openid
+          - profile
+          - email
+        authorization_policy: one_factor
+
+
+storage:
+  encryption_key: $(openssl rand -base64 32 | tr -d '\n')
+  postgres:
+    host: postgres
+    port: 5432
+    database: authelia
+    username: authelia
+    password: authelia
+
+notifier:
+  filesystem:
+    filename: /config/notification.txt

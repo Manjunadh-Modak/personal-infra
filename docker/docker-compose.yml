@@ -1,0 +1,116 @@
+version: '3.8'
+
+services:
+  # Authelia SSO
+  authelia:
+    image: authelia/authelia
+    container_name: authelia
+    volumes:
+      - ../authelia/config.yml:/etc/authelia/configuration.yml
+      - ../authelia/users.yml:/etc/authelia/users_database.yml
+      - authelia_config:/config
+    command: --config /etc/authelia/configuration.yml
+    environment:
+      - TZ=UTC
+    networks:
+      - sre_network
+
+  postgres:
+    image: postgres:14
+    environment:
+      - POSTGRES_USER=authelia
+      - POSTGRES_PASSWORD=authelia
+      - POSTGRES_DB=authelia
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sre_network
+
+  # Gitea
+  gitea:
+    image: gitea/gitea:latest
+    container_name: gitea
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+    volumes:
+      - gitea_data:/data
+      - ../gitea/app.ini:/data/gitea/conf/app.ini
+      - gitea_logs:/data/log
+    networks:
+      - sre_network
+    depends_on:
+      - authelia
+      - loki
+    privileged: true
+
+  # Grafana
+  grafana:
+    image: grafana/grafana-enterprise
+    container_name: grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ../grafana/grafana.ini:/etc/grafana/grafana.ini
+    networks:
+      - sre_network
+    depends_on:
+      - authelia
+    
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ../nginx/ssl:/etc/nginx/ssl
+    networks:
+      - sre_network
+    depends_on:
+      - gitea
+      - grafana
+      - authelia
+  
+  loki:
+    image: grafana/loki:2.9.4
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    user: "0"
+    privileged: true
+    volumes:
+      - ../grafana/loki-config.yaml:/etc/loki/local-config.yaml
+      - ../grafana/loki-data:/loki
+    networks:
+      - sre_network
+
+
+  promtail:
+    image: grafana/promtail:2.9.4
+    container_name: promtail
+    volumes:
+      - ../grafana/promtail-config.yaml:/etc/promtail/config.yaml
+      - ../grafana/logs/gitea:/var/log/gitea
+      - ../grafana/logs/authelia:/var/log/authelia
+    command: -config.file=/etc/promtail/config.yaml
+    depends_on:
+      - loki
+    ports:
+      - "9080:9080"
+    networks:
+      - sre_network
+
+volumes:
+  gitea_data:
+  grafana_data:
+  authelia_config:
+  postgres_data:
+  gitea_logs:
+
+networks:
+  sre_network:
+    driver: bridge
