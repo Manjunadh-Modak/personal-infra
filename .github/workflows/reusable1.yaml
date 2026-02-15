@@ -5,6 +5,5 @@ on:
 
 jobs:
   first:
-    runs-on: self-hosted
-    uses: Manjunadh-Modak/gitops-flash/blob/main/.github/workflows/reusable.yaml
-    
+    uses: Manjunadh-Modak/gitops-flash/blob/main/.github/workflows/reusable.yaml@main
+
