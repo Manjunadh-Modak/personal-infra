@@ -6,5 +6,3 @@ on:
 jobs:
   first:
     uses: Manjunadh-Modak/gitops-flash/.github/workflows/reusable.yaml@main
-    secrets:
-      ready: ${{ secrets.ready }}
