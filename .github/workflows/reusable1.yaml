@@ -5,5 +5,4 @@ on:
 
 jobs:
   first:
-    uses: Manjunadh-Modak/gitops-flash/blob/main/.github/workflows/reusable.yaml@main
-
+    uses: Manjunadh-Modak/gitops-flash/.github/workflows/reusable.yaml@main
