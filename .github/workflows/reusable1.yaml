@@ -1,0 +1,10 @@
+name: Resuable Workflow call
+
+on:
+  workflow_dispatch:
+
+jobs:
+  first:
+    runs-on: self-hosted
+    uses: Manjunadh-Modak/gitops-flash/blob/main/.github/workflows/reusable.yaml
+    
